@@ -1,0 +1,13 @@
+# Services for NFQWS Keenetic integration
+
+restart:
+  name: Restart
+  description: Restart NFQWS service
+
+start:
+  name: Start
+  description: Start NFQWS service
+
+stop:
+  name: Stop
+  description: Stop NFQWS service

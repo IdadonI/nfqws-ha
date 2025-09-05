@@ -1,0 +1,55 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Configure NFQWS HA",
+        "description": "Enter your router SSH credentials",
+        "data": {
+          "host": "Host",
+          "ssh_port": "SSH Port",
+          "web_port": "Web Interface Port", 
+          "username": "Username",
+          "password": "Password",
+          "openwrt_mode": "Use on OpenWRT (Default: Keenetic/Netcraze)",
+          "status_monitoring": "Status monitoring via SSH (Not recommended)"
+        }
+      },
+      "status_monitoring": {
+        "title": "Status Monitoring Settings",
+        "description": "Configure status monitoring interval for {host}",
+        "data": {
+          "scan_interval": "Update interval (seconds)"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Failed to connect to router",
+      "invalid_auth": "Invalid authentication",
+      "unknown": "Unknown error"
+    },
+    "abort": {
+      "already_configured": "Device is already configured"
+    }
+  },
+  "entity": {
+    "button": {
+      "nfqws_start_button": {
+        "name": "Start"
+      },
+      "nfqws_stop_button": {
+        "name": "Stop"
+      },
+      "nfqws_restart_button": {
+        "name": "Restart"
+      }
+    },
+    "sensor": {
+      "nfqws_status_sensor": {
+        "name": "Status"
+      },
+      "nfqws_version_sensor": {
+        "name": "Version"
+      }
+    }
+  }
+}

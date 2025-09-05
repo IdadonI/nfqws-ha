@@ -1,0 +1,14 @@
+{
+  "domain": "nfqws",
+  "name": "NFQWS HA",
+  "codeowners": ["@IdadonI"],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/IdadonI/nfqws-ha",
+  "integration_type": "device",
+  "iot_class": "local_polling",
+  "requirements": ["paramiko==3.4.0"],
+  "version": "0.1.0",
+  "translations": ["en", "ru"],
+  "license": "MIT"
+}
