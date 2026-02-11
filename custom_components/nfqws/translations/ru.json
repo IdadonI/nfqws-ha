@@ -2,53 +2,55 @@
   "config": {
     "step": {
       "user": {
-        "title": "Настройка NFQWS HA",
-        "description": "Введите учетные данные SSH вашего роутера",
+        "title": "Настройка NFQWS",
+        "description": "Введите данные для подключения к роутеру по SSH. По умолчанию используется новая версия nfqws2.",
         "data": {
-          "host": "Хост",
-          "ssh_port": "SSH Порт",
+          "host": "IP-адрес роутера",
+          "ssh_port": "Порт SSH",
           "web_port": "Порт веб-интерфейса",
           "username": "Имя пользователя",
           "password": "Пароль",
-          "openwrt_mode": "Использовать на OpenWRT (По умолчанию: Keenetic/Netcraze)",
-          "status_monitoring": "Проверка состояния через SSH (Не рекомендуется)"
+          "openwrt_mode": "Использовать режим OpenWRT",
+          "use_old_version": "Использовать для старой nfqws (v1)",
+          "status_monitoring": "Включить мониторинг статуса (опрос)"
         }
       },
       "status_monitoring": {
-        "title": "Настройки мониторинга состояния",
-        "description": "Настройте интервал проверки состояния для {host}",
+        "title": "Мониторинг статуса",
+        "description": "Настройте частоту проверки состояния сервиса на {host}",
         "data": {
-          "scan_interval": "Интервал обновления (секунды)"
+          "scan_interval": "Интервал опроса (секунды)"
         }
       }
     },
     "error": {
-      "cannot_connect": "Не удалось подключиться к роутеру",
-      "invalid_auth": "Неверная аутентификация",
-      "unknown": "Неизвестная ошибка"
-    },
-    "abort": {
-      "already_configured": "Устройство уже настроено"
+      "cannot_connect": "Не удалось подключиться к роутеру. Проверьте адрес, порт и учетные данные SSH."
     }
   },
   "entity": {
-    "button": {
-      "nfqws_start_button": {
-        "name": "Запуск"
-      },
-      "nfqws_stop_button": {
-        "name": "Остановка"
-      },
-      "nfqws_restart_button": {
-        "name": "Перезагрузка"
-      }
-    },
     "sensor": {
-      "nfqws_status_sensor": {
-        "name": "Статус"
+      "nfqws_status": {
+        "name": "Статус NFQWS",
+        "state": {
+          "running": "Запущен",
+          "stopped": "Остановлен",
+          "error": "Ошибка",
+          "connection_error": "Ошибка подключения"
+        }
       },
       "nfqws_version_sensor": {
-        "name": "Версия"
+        "name": "Версия NFQWS"
+      }
+    },
+    "button": {
+      "nfqws_start_button": {
+        "name": "Запустить"
+      },
+      "nfqws_stop_button": {
+        "name": "Остановить"
+      },
+      "nfqws_restart_button": {
+        "name": "Перезагрузить"
       }
     }
   }

@@ -2,36 +2,46 @@
   "config": {
     "step": {
       "user": {
-        "title": "Configure NFQWS HA",
-        "description": "Enter your router SSH credentials",
+        "title": "NFQWS Configuration",
+        "description": "Enter your router SSH credentials. NFQWS2 is used by default.",
         "data": {
-          "host": "Host",
+          "host": "Router IP",
           "ssh_port": "SSH Port",
-          "web_port": "Web Interface Port", 
+          "web_port": "Web UI Port",
           "username": "Username",
           "password": "Password",
-          "openwrt_mode": "Use on OpenWRT (Default: Keenetic/Netcraze)",
-          "status_monitoring": "Status monitoring via SSH (Not recommended)"
+          "openwrt_mode": "OpenWRT mode",
+          "use_old_version": "Use for old nfqws (v1)",
+          "status_monitoring": "Enable status monitoring"
         }
       },
       "status_monitoring": {
-        "title": "Status Monitoring Settings",
-        "description": "Configure status monitoring interval for {host}",
+        "title": "Status Monitoring",
+        "description": "Configure polling interval for {host}",
         "data": {
-          "scan_interval": "Update interval (seconds)"
+          "scan_interval": "Scan interval (seconds)"
         }
       }
     },
     "error": {
-      "cannot_connect": "Failed to connect to router",
-      "invalid_auth": "Invalid authentication",
-      "unknown": "Unknown error"
-    },
-    "abort": {
-      "already_configured": "Device is already configured"
+      "cannot_connect": "Failed to connect to router. Check SSH host, port, and credentials."
     }
   },
   "entity": {
+    "sensor": {
+      "nfqws_status": {
+        "name": "NFQWS Status",
+        "state": {
+          "running": "Running",
+          "stopped": "Stopped",
+          "error": "Error",
+          "connection_error": "Connection Error"
+        }
+      },
+      "nfqws_version_sensor": {
+        "name": "NFQWS Version"
+      }
+    },
     "button": {
       "nfqws_start_button": {
         "name": "Start"
@@ -41,14 +51,6 @@
       },
       "nfqws_restart_button": {
         "name": "Restart"
-      }
-    },
-    "sensor": {
-      "nfqws_status_sensor": {
-        "name": "Status"
-      },
-      "nfqws_version_sensor": {
-        "name": "Version"
       }
     }
   }

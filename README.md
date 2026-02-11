@@ -5,21 +5,21 @@
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
 [![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2023.9%2B-blue.svg)](https://www.home-assistant.io)
 
-## 🚀 Features
+## Features
 
+- ⚡ **Full NFQWS2 Support** – Compatible with the latest script paths
+- 🔄 **Legacy Compatibility** – Toggle between NFQWS v1 and v2 with a single checkbox.
 - 📊 **Monitor NFQWS service status** - Real-time status monitoring
-- 🔄 **Start/Stop/Restart NFQWS service** - Full control from Home Assistant
-- 📟 **Display NFQWS version** - Always know which version you're running
 - 🌐 **Dual platform support** - Keenetic/Netcraze and OpenWRT compatibility
 - 🎯 **Configurable monitoring** - Adjust update intervals to your needs
 - 🌍 **Multi-language support** - English and Russian interfaces
 
-## 📋 Supported Platforms
+## Supported Platforms
 
-### ✅ Fully Tested & Supported
+### Fully Tested & Supported
 - **Keenetic routers** with Entware
 
-### 🔬 Experimental Support
+### Experimental Support
 - **OpenWRT devices** - *Theoretical support, needs community testing*
 
 > ⚠️ **OpenWRT Note:** OpenWRT support is implemented based on the official NFQWS documentation but has not been tested due to lack of suitable hardware. If you have an OpenWRT device with NFQWS installed, please test and provide feedback!
@@ -42,35 +42,20 @@
 3. Restart Home Assistant
 4. Add integration via **Settings → Devices & Services → Add Integration → "NFQWS HA"**
 
-## ⚙️ Configuration
-
-### Initial Setup
-
-1. Go to **Settings → Devices & Services → Add Integration**
-2. Search for **"NFQWS HA"**
-3. Enter your router details:
-
-| Setting | Default Value | Description |
-|---------|---------------|-------------|
-| **Host** | - | IP address of your router |
-| **SSH Port** | `222` | SSH port (default for Keenetic) |
-| **Web Port** | `90` | Router web interface port |
-| **Username** | `root` | SSH username |
-| **Password** | - | Your router SSH password |
-| **OpenWRT Mode** | `Disabled` | ✅ Enable for OpenWRT devices |
-| **Status Monitoring** | `Disabled` | Enable for real-time status updates |
-
 ## 🎮 Entities and Controls 
 
 ### Sensors
-| Entity | Icon | Description |
-|--------|------|-------------|
-| **NFQWS Status** | 📊 | Current service status (requires monitoring) |
-| **NFQWS Version** | 📟 | Installed NFQWS version |
+| Entity | Description |
+|--------|-------------|
+| **NFQWS Status** | Current service status (requires monitoring) |
+| **NFQWS Version** | Installed NFQWS version |
 
 ### Buttons
-| Entity | Icon | Description |
-|--------|------|-------------|
-| **NFQWS Start** | 🟢 | Start the NFQWS service |
-| **NFQWS Stop** | 🔴 | Stop the NFQWS service |
-| **NFQWS Restart** | 🔄 | Restart the NFQWS service |
+| Entity | Description |
+|--------|-------------|
+| **NFQWS Start** | Start the NFQWS service |
+| **NFQWS Stop** | Stop the NFQWS service |
+| **NFQWS Restart** | Restart the NFQWS service |
+
+---
+*Disclaimer: This integration is not affiliated with Keenetic or the NFQWS developers. Use it at your own risk.*

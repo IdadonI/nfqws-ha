@@ -13,10 +13,13 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from .const import (
     DOMAIN, CONF_SSH_PORT, DEFAULT_SSH_PORT, CONF_STATUS_MONITORING, 
     CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL, CONF_OPENWRT_MODE,
+    CONF_USE_OLD_VERSION,
     CMD_STATUS_KEENETIC, CMD_STATUS_OPENWRT,
     CMD_START_KEENETIC, CMD_START_OPENWRT,
     CMD_STOP_KEENETIC, CMD_STOP_OPENWRT,
-    CMD_RESTART_KEENETIC, CMD_RESTART_OPENWRT
+    CMD_RESTART_KEENETIC, CMD_RESTART_OPENWRT,
+    CMD_STATUS_KEENETIC_V2, CMD_START_KEENETIC_V2,
+    CMD_STOP_KEENETIC_V2, CMD_RESTART_KEENETIC_V2
 )
 from .ssh_helper import SSHHelper
 
@@ -36,8 +39,8 @@ class NFQWSDataUpdateCoordinator(DataUpdateCoordinator[NFQWSData]):
 
     def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
         """Initialize."""
-        # Use scan interval if status_monitoring is enabled, otherwise use very long interval
-        update_interval = timedelta(seconds=3600)  # 1 hour by default
+        # Используем интервал обновления, если включен мониторинг статуса
+        update_interval = timedelta(seconds=3600)  # 1 час по умолчанию
         
         if entry.data.get(CONF_STATUS_MONITORING, False):
             update_interval = timedelta(seconds=entry.data.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL))
@@ -51,13 +54,14 @@ class NFQWSDataUpdateCoordinator(DataUpdateCoordinator[NFQWSData]):
         self.entry = entry
         self.nfqws_version = "unknown"
         self.is_openwrt = entry.data.get(CONF_OPENWRT_MODE, False)
+        # Настройка версии: если True — используем старый скрипт, если False (по умолчанию) — nfqws2
+        self.use_old_version = entry.data.get(CONF_USE_OLD_VERSION, False)
         
-        # Set device info based on mode
         self.manufacturer = "OpenWRT" if self.is_openwrt else "Keenetic"
-        self.model = "NFQWS"
+        self.model = "NFQWS2" if not self.use_old_version and not self.is_openwrt else "NFQWS"
 
     def _get_command(self, command_type: str) -> str:
-        """Get the appropriate command based on platform."""
+        """Get the appropriate command based on platform and version."""
         if self.is_openwrt:
             commands = {
                 "status": CMD_STATUS_OPENWRT,
@@ -66,12 +70,21 @@ class NFQWSDataUpdateCoordinator(DataUpdateCoordinator[NFQWSData]):
                 "restart": CMD_RESTART_OPENWRT
             }
         else:
-            commands = {
-                "status": CMD_STATUS_KEENETIC,
-                "start": CMD_START_KEENETIC,
-                "stop": CMD_STOP_KEENETIC,
-                "restart": CMD_RESTART_KEENETIC
-            }
+            # Для Keenetic выбираем набор команд в зависимости от настройки
+            if self.use_old_version:
+                commands = {
+                    "status": CMD_STATUS_KEENETIC,
+                    "start": CMD_START_KEENETIC,
+                    "stop": CMD_STOP_KEENETIC,
+                    "restart": CMD_RESTART_KEENETIC
+                }
+            else:
+                commands = {
+                    "status": CMD_STATUS_KEENETIC_V2,
+                    "start": CMD_START_KEENETIC_V2,
+                    "stop": CMD_STOP_KEENETIC_V2,
+                    "restart": CMD_RESTART_KEENETIC_V2
+                }
         return commands.get(command_type, "")
 
     async def _async_update_data(self) -> NFQWSData:
@@ -110,33 +123,30 @@ class NFQWSDataUpdateCoordinator(DataUpdateCoordinator[NFQWSData]):
                     "model": self.model
                 }
             
-            # Get NFQWS status
+            # Получаем статус через выбранную команду
             status_cmd = self._get_command("status")
             stdout, stderr = ssh_helper.execute_command(status_cmd)
             
-            if stderr:
-                self.logger.warning("Error getting NFQWS status: %s", stderr)
-            
-            # Different status detection for OpenWRT vs Keenetic
-            if self.is_openwrt:
-                is_running = "running" in stdout.lower() if stdout else False
-            else:
-                is_running = "is running" in stdout if stdout else False
+            # В nfqws2 проверка статуса возвращает строку, ищем "is running"
+            is_running = False
+            if stdout:
+                if self.is_openwrt:
+                    is_running = "running" in stdout.lower()
+                else:
+                    is_running = "is running" in stdout.lower()
                 
             status = "running" if is_running else "stopped"
             
-            # Get NFQWS version (only once or if not set)
+            # Получаем версию пакета (выполняется один раз)
             if self.nfqws_version == "unknown":
-                stdout_version, stderr_version = ssh_helper.execute_command("opkg info nfqws-keenetic")
-                if stdout_version:
-                    # Extract version from the output
-                    version_match = re.search(r'Version:\s*([\d.]+)', stdout_version)
+                # Определяем имя пакета для opkg
+                pkg_name = "nfqws-keenetic" if self.use_old_version or self.is_openwrt else "nfqws2"
+                stdout_v, _ = ssh_helper.execute_command(f"opkg info {pkg_name}")
+                
+                if stdout_v:
+                    version_match = re.search(r'Version:\s*([\d.]+)', stdout_v)
                     if version_match:
                         self.nfqws_version = version_match.group(1)
-                    else:
-                        self.logger.warning("Could not extract version from opkg output")
-                elif stderr_version:
-                    self.logger.warning("Error getting NFQWS version: %s", stderr_version)
             
             return {
                 "status": status, 
@@ -148,7 +158,7 @@ class NFQWSDataUpdateCoordinator(DataUpdateCoordinator[NFQWSData]):
             }
                 
         except Exception as err:
-            self.logger.error("Unexpected error: %s", err)
+            self.logger.error("Unexpected error in coordinator: %s", err)
             return {
                 "status": "error", 
                 "available": False, 
@@ -161,7 +171,7 @@ class NFQWSDataUpdateCoordinator(DataUpdateCoordinator[NFQWSData]):
             ssh_helper.disconnect()
 
     async def async_execute_command(self, command_type: str) -> bool:
-        """Execute a command via SSH."""
+        """Execute a command (start/stop/restart) via SSH."""
         ssh_helper = SSHHelper(
             self.entry.data["host"],
             self.entry.data.get(CONF_SSH_PORT, DEFAULT_SSH_PORT),
@@ -171,16 +181,17 @@ class NFQWSDataUpdateCoordinator(DataUpdateCoordinator[NFQWSData]):
         
         command = self._get_command(command_type)
         if not command:
-            self.logger.error("Unknown command type: %s", command_type)
             return False
         
         try:
-            stdout, stderr = await self.hass.async_add_executor_job(
+            # Для запуска/остановки используем исполнителя HA, чтобы не блокировать цикл
+            await self.hass.async_add_executor_job(ssh_helper.connect)
+            _, stderr = await self.hass.async_add_executor_job(
                 ssh_helper.execute_command, command, 30
             )
             
-            if stderr:
-                self.logger.error("Error executing command %s: %s", command, stderr)
+            if stderr and "error" in stderr.lower():
+                self.logger.error("Error executing %s: %s", command, stderr)
                 return False
             return True
             
