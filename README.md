@@ -48,7 +48,6 @@
 | Entity | Description |
 |--------|-------------|
 | **NFQWS Status** | Current service status (requires monitoring) |
-| **NFQWS Version** | Installed NFQWS version |
 
 ### Buttons
 | Entity | Description |
